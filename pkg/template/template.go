@@ -183,10 +183,10 @@ func (t *dirTemplate) Execute(dirPrefix string) error {
 		buf := stringutil.NewString("")
 
 		// TODO translate errors into meaningful ones
-		fnameTmpl := template.Must(template.
+		fnameTmpl := template.Must(t.delims(template.
 			New("file name template").
 			Option(Options...).
-			Funcs(FuncMap).
+			Funcs(FuncMap)).
 			Parse(oldName))
 
 		if err := fnameTmpl.Execute(buf, nil); err != nil {
@@ -233,10 +233,10 @@ func (t *dirTemplate) Execute(dirPrefix string) error {
 				}
 			}(f.Name())
 
-			contentsTmpl := template.Must(template.
+			contentsTmpl := template.Must(t.delims(template.
 				New("file contents template").
 				Option(Options...).
-				Funcs(FuncMap).
+				Funcs(FuncMap)).
 				ParseFiles(filename))
 
 			fileTemplateName := filepath.Base(filename)
@@ -252,4 +252,17 @@ func (t *dirTemplate) Execute(dirPrefix string) error {
 
 		return nil
 	})
+}
+
+func (t *dirTemplate) delims(tt *template.Template) *template.Template {
+	if d, ok := t.Context[boilr.DelimsProperty].([]interface{}); ok {
+		if len(d) == 2 {
+			left, lok := d[0].(string)
+			right, rok := d[1].(string)
+			if lok && rok {
+				tt.Delims(left, right)
+			}
+		}
+	}
+	return tt
 }
