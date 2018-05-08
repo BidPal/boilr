@@ -41,6 +41,9 @@ const (
 
 	// GithubRepo is the name of the github repository
 	GithubRepo = "boilr"
+
+	// DelimsProperty is the name of a special property in the file defined by ContextFileName which alters the template delimiters for that project
+	DelimsProperty = "TemplateDelims"
 )
 
 // Configuration contains the values for needed for boilr to operate.
