@@ -39,30 +39,10 @@ func Get(path string) (Interface, error) {
 		return nil, err
 	}
 
-	// TODO make context optional
-	ctxt, err := func(fname string) (map[string]interface{}, error) {
-		f, err := os.Open(fname)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return nil, nil
-			}
-
-			return nil, err
-		}
-		defer f.Close()
-
-		buf, err := ioutil.ReadAll(f)
-		if err != nil {
-			return nil, err
-		}
-
-		var metadata map[string]interface{}
-		if err := json.Unmarshal(buf, &metadata); err != nil {
-			return nil, err
-		}
-
-		return metadata, nil
-	}(filepath.Join(absPath, boilr.ContextFileName))
+	ctxt, err := readContext(filepath.Join(absPath, boilr.ContextFileName))
+	if err != nil {
+		return nil, err
+	}
 
 	metadataExists, err := osutil.FileExists(filepath.Join(absPath, boilr.TemplateMetadataName))
 	if err != nil {
@@ -110,58 +90,47 @@ func (t *dirTemplate) UseDefaultValues() {
 }
 
 func (t *dirTemplate) BindPrompts() {
-	for s := range t.Context {
-		v := t.Context[s]
+	t.bindPromptsCore(t.Context, func() interface{} { return true })
+}
 
-		if m, ok := v.(map[string]interface{}); ok {
-			advancedMode := prompt.New(s, false)
-
-			for k := range m {
-				v2 := m[k]
-				if t.ShouldUseDefaults {
-					t.FuncMap[k] = func() interface{} {
-						switch v2 := v2.(type) {
-						// First is the default value if it's a slice
-						case []interface{}:
-							return v2[0]
-						}
-
-						return v2
-					}
-				} else {
-					v, p := v2, prompt.New(k, v2)
-
-					t.FuncMap[k] = func() interface{} {
-						if val := advancedMode().(bool); val {
-							return p()
-						}
-
-						return v
-					}
-				}
-			}
-
-			continue
-		}
-
-		if t.ShouldUseDefaults {
-			t.FuncMap[s] = func() interface{} {
-				switch v := v.(type) {
-				// First is the default value if it's a slice
-				case []interface{}:
-					return v[0]
-				}
-
-				return v
-			}
+func (t *dirTemplate) bindPromptsCore(context map[string]interface{}, gateFn func() interface{}) {
+	for key, val := range context {
+		if m, ok := val.(map[string]interface{}); ok {
+			t.bindPromptsCore(m, prompt.New(key, false))
 		} else {
-			t.FuncMap[s] = prompt.New(s, v)
+			t.bindPrompt(context, key, gateFn)
 		}
+	}
+}
+
+func (t *dirTemplate) bindPrompt(context map[string]interface{}, key string, gateFn func() interface{}) {
+	val := context[key]
+	def := val
+	if a, ok := def.([]interface{}); ok {
+		def = a[0]
+	}
+
+	p := prompt.New(key, val)
+	t.FuncMap[key] = func() interface{} {
+		v := def
+		if !t.ShouldUseDefaults {
+			if gateFn().(bool) {
+				v = p()
+			}
+		}
+
+		context[key] = v
+		return v
 	}
 }
 
 // Execute fills the template with the project metadata.
 func (t *dirTemplate) Execute(dirPrefix string) error {
+	localContext := filepath.Join(dirPrefix, boilr.LocalDefaultsFileName)
+	if err := t.updateContext(localContext); err != nil {
+		return err
+	}
+
 	t.BindPrompts()
 
 	isOnlyWhitespace := func(buf []byte) bool {
@@ -172,7 +141,7 @@ func (t *dirTemplate) Execute(dirPrefix string) error {
 
 	// TODO create io.ReadWriter from string
 	// TODO refactor name manipulation
-	return filepath.Walk(t.Path, func(filename string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(t.Path, func(filename string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -254,7 +223,51 @@ func (t *dirTemplate) Execute(dirPrefix string) error {
 		}
 
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+
+	return t.saveContext(localContext)
+}
+
+// updateContext will augment the current context with the values from the file at the provided path
+func (t *dirTemplate) updateContext(path string) error {
+	context, err := readContext(path)
+	if err != nil {
+		return err
+	}
+
+	if context != nil {
+		for key, value := range context {
+			if key == boilr.DelimsProperty {
+				continue
+			}
+
+			// If the value exists in the local file but not in the actual context, we'll just ignore it as most likely the template has changed since it was last saved
+			if _, ok := t.Context[key]; ok {
+				t.Context[key] = value
+			}
+		}
+	}
+
+	return nil
+}
+
+// saveContext will save the current context to the file at the provided path
+func (t *dirTemplate) saveContext(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(t.Context); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (t *dirTemplate) delims(tt *template.Template) *template.Template {
@@ -268,4 +281,24 @@ func (t *dirTemplate) delims(tt *template.Template) *template.Template {
 		}
 	}
 	return tt
+}
+
+func readContext(fname string) (map[string]interface{}, error) {
+	f, err := os.Open(fname)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+	defer f.Close()
+
+	var metadata map[string]interface{}
+	dec := json.NewDecoder(f)
+	if err := dec.Decode(&metadata); err != nil {
+		return nil, err
+	}
+
+	return metadata, nil
 }
