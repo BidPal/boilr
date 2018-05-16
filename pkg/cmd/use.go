@@ -86,6 +86,12 @@ var Use = &cli.Command{
 			}
 			defer os.RemoveAll(tmpDir)
 
+			if err := osutil.Copy(filepath.Join(targetDir, boilr.LocalDefaultsFileName), filepath.Join(tmpDir, boilr.LocalDefaultsFileName)); err != nil {
+				if !os.IsNotExist(err) {
+					return err
+				}
+			}
+
 			if err := tmpl.Execute(tmpDir); err != nil {
 				return err
 			}

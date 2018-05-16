@@ -86,28 +86,37 @@ func CopyRecursively(srcPath, dstPath string) error {
 				}
 			}
 		} else {
-			fi, err := os.Lstat(fname)
-			if err != nil {
-				return err
-			}
-
-			srcf, err := os.Open(fname)
-			if err != nil {
-				return err
-			}
-			defer srcf.Close()
-
-			dstf, err := os.OpenFile(mirrorPath, os.O_CREATE|os.O_WRONLY, fi.Mode())
-			if err != nil {
-				return err
-			}
-			defer dstf.Close()
-
-			if _, err := io.Copy(dstf, srcf); err != nil {
+			if err := Copy(fname, mirrorPath); err != nil {
 				return err
 			}
 		}
 
 		return nil
 	})
+}
+
+// Copy copies a single file from srcPath to dstPath
+func Copy(srcPath, dstPath string) error {
+	fi, err := os.Lstat(srcPath)
+	if err != nil {
+		return err
+	}
+
+	srcf, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer srcf.Close()
+
+	dstf, err := os.OpenFile(dstPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, fi.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstf.Close()
+
+	if _, err := io.Copy(dstf, srcf); err != nil {
+		return err
+	}
+
+	return nil
 }

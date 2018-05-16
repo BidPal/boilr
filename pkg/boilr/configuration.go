@@ -30,6 +30,9 @@ const (
 	// ContextFileName is the name of the file that contains the context values for the template
 	ContextFileName = "project.json"
 
+	// LocalDefaultsFileName is the name of a file in the current directory which will override the context values for the template
+	LocalDefaultsFileName = ".boilr-defaults.json"
+
 	// TemplateDirName is the name of the directory that contains the template files in a boilr template
 	TemplateDirName = "template"
 
