@@ -1,8 +1,0 @@
-package: github.com/BidPal/boilr
-import:
-- package: github.com/spf13/cobra
-- package: github.com/docker/go-units
-- package: github.com/olekukonko/tablewriter
-- package: github.com/fatih/color
-- package: github.com/Masterminds/sprig
-  version: ^2.15.0

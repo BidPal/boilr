@@ -24,8 +24,8 @@ _testmain.go
 *.prof
 
 # dep management files
-glide.lock
 vendor
+vendor.orig
 
 # don't accidentally commit a build of main
 boilr
