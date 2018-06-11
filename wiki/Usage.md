@@ -6,7 +6,7 @@ In order to download a template from a github repository, use the following comm
 
 ```bash
 boilr template download <github-repo-path> <template-name>
-boilr template download tmrts/boilr-license license
+boilr template download BidPal/boilr-license license
 ```
 
 The downloaded template will be saved to local `boilr` registry.

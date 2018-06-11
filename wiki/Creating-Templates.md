@@ -6,7 +6,7 @@ file that contains the default values that you'd like to substitute
 {
     "Name": "example-project",
     "Author": "Tamer Tas",
-    "Email": "contact@tmrts.com",
+    "Email": "contact@bidpal.com",
     "PrintHomeDir": true,
     "License": [
         "MIT",

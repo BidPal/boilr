@@ -2,10 +2,10 @@ package main
 
 import (
   "fmt"
-  "github.com/tmrts/boilr/pkg/boilr"
-  "github.com/tmrts/boilr/pkg/cmd"
-  "github.com/tmrts/boilr/pkg/util/exit"
-  "github.com/tmrts/boilr/pkg/util/osutil"
+  "github.com/BidPal/boilr/pkg/boilr"
+  "github.com/BidPal/boilr/pkg/cmd"
+  "github.com/BidPal/boilr/pkg/util/exit"
+  "github.com/BidPal/boilr/pkg/util/osutil"
 )
 
 func main() {
