@@ -21,6 +21,11 @@ Boilr
 
 For more details, see [Introduction](https://github.com/BidPal/boilr/wiki/Introduction) page.
 
+# History
+This project originated at [tmrts/boilr](https://github.com/tmrts/boilr). We have found this utility extremely
+useful but it has been unmaintained for close to a year at the time of writing. As such, we have decided to
+create a permanent fork and continue development here.
+
 # Features
 * **No dependencies (NodeJS, Python Interpreter etc.)** - Boilr is a single statically linked binary.
 Grab the one that fits your architecture, and you're all set to save time by using templates!
