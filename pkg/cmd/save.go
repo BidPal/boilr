@@ -7,11 +7,11 @@ import (
 
 	cli "github.com/spf13/cobra"
 
-	"github.com/tmrts/boilr/pkg/boilr"
-	"github.com/tmrts/boilr/pkg/util/exec"
-	"github.com/tmrts/boilr/pkg/util/exit"
-	"github.com/tmrts/boilr/pkg/util/osutil"
-	"github.com/tmrts/boilr/pkg/util/validate"
+	"github.com/BidPal/boilr/pkg/boilr"
+	"github.com/BidPal/boilr/pkg/util/exec"
+	"github.com/BidPal/boilr/pkg/util/exit"
+	"github.com/BidPal/boilr/pkg/util/osutil"
+	"github.com/BidPal/boilr/pkg/util/validate"
 )
 
 // Save contains the cli-command for saving templates to template registry.
