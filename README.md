@@ -36,9 +36,6 @@ the [license template](https://github.com/BidPal/boilr-license) to see a simple,
 adding licenses to new projects with a single command.
 
 # Installation
-Binaries for Linux & OSX are built automatically by Travis every release.
-You can download them directly or run the installation script.
-
 Please see [Installation](https://github.com/BidPal/boilr/wiki/Installation) page for more information.
 
 # Getting Started with Boilr
